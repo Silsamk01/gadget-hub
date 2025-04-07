@@ -27,6 +27,14 @@ const productsRouter = require('./backend/routes/products');
 const searchRouter = require('./backend/routes/search');
 const cartRouter = require('./backend/routes/cart');
 
+console.log({
+    homeRouter: typeof homeRouter,
+    vendorsRoute: typeof vendorsRouter,
+    productsRouter: typeof productsRouter,
+    searchRoute: typeof searchRouter,
+    cartRoute: typeof cartRouter
+})
+
 // Mount routes
 app.use('/', homeRouter);
 app.use('/vendors', vendorsRouter);

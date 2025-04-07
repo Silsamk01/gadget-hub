@@ -4,14 +4,6 @@ const router = express.Router();
 const { Product, Vendor } = require('../models');
 
 router.get('/', async (req, res) => {
-    const products = await Product.findAll({
-        include: [Vendor]
-    });
-    // ...
-});
-
-
-router.get('/', async (req, res) => {
     try {
         const featuredProducts = await Product.findAll({
             where: { featured: true },
