@@ -1,0 +1,175 @@
+<%- include('../partials/header') %>
+
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <section class="hero-section bg-dark text-white text-center py-5">
+        <div class="container">
+            <h1 class="display-4 mb-4">Discover Gadgets Near You</h1>
+            <form action="/search" method="GET" class="search-form">
+                <div class="input-group mb-3">
+                    <input type="search" name="query" 
+                           class="form-control form-control-lg" 
+                           placeholder="Search gadgets or stores..."
+                           aria-label="Search"
+                           required>
+                    <button class="btn btn-primary btn-lg" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Location-Based Store Finder -->
+    <section class="map-section py-5 bg-light">
+        <div class="container">
+            <h2 class="mb-4">Stores Near You</h2>
+            <div id="map" class="map-container"></div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Trending Gadgets</h2>
+                <a href="/products" class="btn btn-outline-primary">View All</a>
+            </div>
+            
+            <div class="row">
+                <% if (featuredProducts.length > 0) { %>
+                    <% featuredProducts.forEach(product => { %>
+                    <div class="col-md-4 mb-4">
+                        <div class="card product-card h-100">
+                            <img src="<%= product.image || '/img/placeholder-product.jpg' %>" 
+                                 class="card-img-top" 
+                                 alt="<%= product.name %>">
+                            <div class="card-body">
+                                <h5 class="card-title"><%= product.name %></h5>
+                                <p class="card-text text-primary">
+                                    $<%= product.price.toFixed(2) %>
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="rating-stars">
+                                        <% for(let i=0; i<5; i++) { %>
+                                            <i class="bi bi-star<%= i < product.averageRating ? '-fill' : '' %>"></i>
+                                        <% } %>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= product.Vendor.businessName %>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <a href="/products/<%= product.id %>" 
+                                   class="btn btn-sm btn-primary w-100">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="alert alert-info">No featured products available</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </section>
+
+    <!-- Verified Vendors -->
+    <section class="verified-vendors py-5 bg-light">
+        <div class="container">
+            <h2 class="mb-4">Verified Vendors</h2>
+            <div class="row">
+                <% if (verifiedVendors.length > 0) { %>
+                    <% verifiedVendors.forEach(vendor => { %>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card vendor-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-shop fs-3 text-primary"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="mb-0"><%= vendor.businessName %></h5>
+                                        <small class="text-muted">
+                                            <%= vendor.distance.toFixed(1) %> km away
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="vendor-details">
+                                    <p class="mb-2">
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                        <%= vendor.rating.toFixed(1) %> 
+                                        (<%= vendor.reviewCount %> reviews)
+                                    </p>
+                                    <div class="categories">
+                                        <% vendor.categories.forEach(category => { %>
+                                            <span class="badge bg-secondary me-1">
+                                                <%= category %>
+                                            </span>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <a href="/vendors/<%= vendor.id %>" 
+                                   class="btn btn-outline-primary w-100">
+                                    Visit Store
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="alert alert-info">No verified vendors in your area</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Google Maps Integration -->
+<script>
+function initMap() {
+    const userLocation = { 
+        lat: <%= userLocation.lat || 37.7749 %>, 
+        lng: <%= userLocation.lng || -122.4194 %> 
+    };
+    
+    const map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 12,
+        center: userLocation
+    });
+
+    // Add user marker
+    new google.maps.Marker({
+        position: userLocation,
+        map: map,
+        title: 'Your Location',
+        icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+    });
+
+    // Add vendor markers
+    <% verifiedVendors.forEach(vendor => { %>
+        new google.maps.Marker({
+            position: { 
+                lat: <%= vendor.location.coordinates[1] %>, 
+                lng: <%= vendor.location.coordinates[0] %> 
+            },
+            map: map,
+            title: '<%= vendor.businessName %>',
+            icon: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+        });
+    <% }) %>
+}
+</script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+</script>
+
+<%- include('../partials/footer') %>
