@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { Op, sequelize } = require('sequelize'); 
+
 const Product = require('../models/Product');
 const Vendor = require('../models/Vendor');
 
@@ -33,7 +35,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// In search.js add this route
 router.get('/nearby', async (req, res) => {
     try {
         const { latitude, longitude } = req.query;
@@ -57,3 +58,5 @@ router.get('/nearby', async (req, res) => {
         res.status(500).send('Location search failed');
     }
 });
+
+module.exports = router;
